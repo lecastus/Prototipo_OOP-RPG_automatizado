@@ -1,15 +1,13 @@
 
-from criatura import criatura
-sys.path.insert(0, '..\\Assets\\Dados\\')
-sys.path.insert(0, '..\\Assets\\habilidades\\')
+from Assets.Criaturas.criatura import criatura
+from Assets.Dados.dado import dado
+from Assets.habilidades.Arquetipos import arquetipo
 
 
 class personagem(criatura):
     '''
     Esta á classe fundamental dos personagens
     '''
-    from dados import dado
-    from Arquetipos import arquetipo
 
     Arquetipos = arquetipo()
 
@@ -153,7 +151,7 @@ class personagem(criatura):
         self._armadura = armaduras
         self._armas = armaduras
 
-        self.dado = dado()
+        self.dado = dado(qtd=3)
 
     def _inicializar_personagem(self):
         # aplica todos os bonus da criação de personagem fornecida
@@ -195,7 +193,8 @@ class personagem(criatura):
                                   ] += efeito_juventude['dados atributo primario']
         self._Atributos_secundarios_civis[self._passado['juventude']
                                           [2]] += efeito_familia['dados atributo secundario civil']
-        self._habilidades{self._passado['juventude'][3]: Arquetipos._obj_arquetipos[self._passado['juventude'][3]]._obj_habilidades[self._passado['juventude'][4]}
+        self._habilidades = {self._passado['juventude'][3]: self.Arquetipos._obj_arquetipos[
+            self._passado['juventude'][3]]._obj_habilidades[self._passado['juventude'][4]]}
         self._habilidades[self._passado['juventude'][3]]()
 
         # aplica todos os bonus da ancetralidade e cultura
@@ -208,12 +207,12 @@ class personagem(criatura):
         pass
 
 
-personagem_teste= personagem(
-    nome='Testus',
-    idade=30,
-    ancestralidade='Humano',
-    cultura='Alto Humano',
-    passado={'familia': [1, 'Fé', 'Ageis e Longas'], 'infancia': [1, 1],
-             'adolecencia': [1, 'Atletismo', 'Ageis e Longas'], 'juventude': [1, 1, '-', 'herói', 2]},
-    armas={'Mão direita': 'Espada Longa'},
-    armaduras={})
+# personagem_teste = personagem(
+#     nome='Testus',
+#     idade=30,
+#     ancestralidade='Humano',
+#     cultura='Alto Humano',
+#     passado={'familia': [1, 'Fé', 'Ageis e Longas'], 'infancia': [1, 1],
+#              'adolecencia': [1, 'Atletismo', 'Ageis e Longas'], 'juventude': [1, 1, '-', 'herói', 2]},
+#     armas={'Mão direita': 'Espada Longa'},
+#     armaduras={})

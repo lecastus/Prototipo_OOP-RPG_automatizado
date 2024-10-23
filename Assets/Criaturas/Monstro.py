@@ -1,5 +1,5 @@
 
-from criatura import criatura
+from Assets.Criaturas.criatura import criatura
 
 
 class monstro(criatura):
