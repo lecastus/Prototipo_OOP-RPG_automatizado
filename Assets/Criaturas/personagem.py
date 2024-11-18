@@ -2,6 +2,7 @@
 from Assets.Criaturas.criatura import criatura
 from Assets.Dados.dado import dado
 from Assets.habilidades.Arquetipos import arquetipo
+import math
 
 
 class personagem(criatura):
@@ -10,15 +11,6 @@ class personagem(criatura):
     '''
 
     Arquetipos = arquetipo()
-
-    _Atributos_primarios = {
-        'forca': 0,
-        'destreza': 0,
-        'constituicao': 0,
-        'intuicao': 0,
-        'erudicao': 0,
-        'personalidade': 0
-    }
 
     _Aprendizagem = {
         'pontos_de_aprendizagem_atuais': 0,
@@ -40,7 +32,7 @@ class personagem(criatura):
         'Culinária': 0,
         'Cultivo': 0,
         'Empatia': 0,
-        'Fe': 0,
+        'Fé': 0,
         'Folego': 0,
         'Furtividade': 0,
         'História': 0,
@@ -58,9 +50,9 @@ class personagem(criatura):
     }
 
     _Atributos_secundarios_belicos = {
-        'ageis_e_minusculas': 0,
-        'ageis_e_curtas': 0,
-        'ageis_e_longas': 0,
+        'Ageis e Minusculas': 0,
+        'Ageis e Curtas': 0,
+        'Ageis e Longas': 0,
         'ageis_e_imensas': 0,
         'aparadores': 0,
         'barreiras': 0,
@@ -118,7 +110,7 @@ class personagem(criatura):
             'adolecencia': 'responsavel',
             'Descrição': 'Você abraçou seu caminho até o fim',
             'dados atributo primario': 1,
-            'Qual atributo_primario': 'Con',
+            'Qual atributo_primario': 'Constituicao',
             'Desafetos': 'Uma família rival no seu oficio',
             'dados atributo secundario civil relacionado ao primario': 1,
             'dados atributo secundario belico': 1,
@@ -130,7 +122,7 @@ class personagem(criatura):
             'juventude': 'Soldado',
             'Descrição': 'Você luta pelo país ou por um nobre',
             'dados atributo primario': 1,
-            'Qual atributo_primario': ['For', 'Con'],
+            'Qual atributo_primario': ['Força', 'Constituicao'],
             'dados atributo secundario civil': None,
             'Habilidade de tier 1 du arquetipo': ['Cuidador', 'Herói', 'Lider'],
         }
@@ -142,14 +134,28 @@ class personagem(criatura):
         'rolagem_dano': 1
     }
 
+    _tamanho_por_ancestralidade = {
+        'Humano': 'Medio'
+    }
+
     def __init__(self, nome='anonymous', idade=0, ancestralidade='', cultura='', passado={}, armas={}, armaduras={}):
         criatura.__init__(self, nome=nome)
         self._idade = idade
         self._ancestralidade = ancestralidade
+        self._tamanho = self._tamanho_por_ancestralidade[ancestralidade]
         self._cultura = cultura
         self._passado = passado
         self._armadura = armaduras
-        self._armas = armaduras
+        self._armas = armas
+
+        self._Atributos_primarios = {
+            'Força': 0,
+            'Destreza': 0,
+            'Constituicao': 0,
+            'Intuicao': 0,
+            'Erudicao': 0,
+            'Personalidade': 0
+        }
 
         self.dado = dado(qtd=3)
 
@@ -157,15 +163,15 @@ class personagem(criatura):
         # aplica todos os bonus da criação de personagem fornecida
 
         # Efeitos de familia
-        efeito_familia = self._origem_familia[self._passado['familia']]
+        efeito_familia = self._origem_familia[self._passado['familia'][0]]
         self._Anotacoes['familia'] = efeito_familia['Familia'][0]
         self._Anotacoes['descricao_familia'] = efeito_familia['Descrição']
         self._Algibeira['moedas_de_prata'] += self.dado._rolagem_simples(
-            efeito_familia['Moedas de prata em equipamento em d6'])
+            efeito_familia['Moedas de prata em equipamento em d6'])[0]
         self._Atributos_secundarios_civis[self._passado['familia']
                                           [1]] += efeito_familia['dados atributo secundario civil']
-        self._Atributos_secundarios_civis[self._passado['familia']
-                                          [2]] += efeito_familia['dados atributo secundario belico']
+        self._Atributos_secundarios_belicos[self._passado['familia']
+                                            [2]] += efeito_familia['dados atributo secundario belico']
 
         # Efeitos de infancia
         efeito_infancia = self._origem_infancia[self._passado['infancia'][0]]
@@ -183,7 +189,7 @@ class personagem(criatura):
                                   ] += efeito_adolecencia['dados atributo primario']
         self._Anotacoes['desafetos'] = efeito_adolecencia['Desafetos']
         self._Atributos_secundarios_civis[self._passado['adolecencia']
-                                          [1]] += efeito_familia['dados atributo secundario civil relacionado ao primario']
+                                          [1]] += efeito_adolecencia['dados atributo secundario civil relacionado ao primario']
 
         # Efeitos de juventude
         efeito_juventude = self._origem_juventude[self._passado['juventude'][0]]
@@ -193,15 +199,32 @@ class personagem(criatura):
                                   ] += efeito_juventude['dados atributo primario']
         self._Atributos_secundarios_civis[self._passado['juventude']
                                           [2]] += efeito_familia['dados atributo secundario civil']
-        self._habilidades = {self._passado['juventude'][3]: self.Arquetipos._obj_arquetipos[
-            self._passado['juventude'][3]]._obj_habilidades[self._passado['juventude'][4]]}
-        self._habilidades[self._passado['juventude'][3]]()
+
+        objeto_arquetipo_escolhido = self.Arquetipos._obj_arquetipos[
+            self._passado['juventude'][3]]
+        nome_habilidade_escolhida = list(objeto_arquetipo_escolhido._obj_habilidades.keys())[
+            self._passado['juventude'][4]]
+        self._habilidades = {
+            self._passado['juventude'][3]: objeto_arquetipo_escolhido._obj_habilidades[nome_habilidade_escolhida]}
+
+        self._habilidades[self._passado['juventude'][3]]['habilidade'](self)
+
+        print(self._nome, self._Atributos_primarios)
+        self._Caracteristicas_fisicas = {
+            'Pontos_de_saude': self._pontos_de_saude_por_tamanho[self._tamanho],
+            'Pontos_de_saude_max': self._pontos_de_saude_por_tamanho[self._tamanho],
+            'Pontos_de_vigor': 8+(math.ceil(self._Atributos_primarios['Constituicao']/2)*6)+math.ceil(self._Atributos_secundarios_civis['Folego']/2)*6,
+            'Pontos_de_vigor_max': 8+(math.ceil(self._Atributos_primarios['Constituicao']/2)*6)+math.ceil(self._Atributos_secundarios_civis['Folego']/2)*6,
+            'Pontos_de_folego': 8+(math.ceil(self._Atributos_primarios['Constituicao']/2)*6),
+            'Pontos_de_folego_max': 8+(math.ceil(self._Atributos_primarios['Constituicao']/2)*6)
+        }
+
+        print(self._Caracteristicas_fisicas)
 
         # aplica todos os bonus da ancetralidade e cultura
         # calcula variaveis de aprendizagem
         # calcula percepção passiva
         # aplica valores da algibeira
-        pass
 
     def _utiliza_atributo_secundario_civil(self, atributo_utilizado):
         pass
